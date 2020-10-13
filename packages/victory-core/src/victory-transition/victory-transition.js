@@ -36,14 +36,14 @@ export default class VictoryTransition extends React.Component {
     this.setState({ nodesShouldLoad: true }); //eslint-disable-line react/no-did-mount-set-state
   }
 
-  shouldComponentUpdate(nextProps) {
-    if (!isEqual(this.props, nextProps)) {
+  componentDidUpdate(prevProps) {
+    if (!isEqual(this.props, prevProps)) {
       this.timer.bypassAnimation();
-      this.setState(this.getTransitionState(this.props, nextProps), () =>
-        this.timer.resumeAnimation()
-      );
+      //eslint-disable-next-line react/no-did-update-set-state
+      this.setState(this.getTransitionState(prevProps, this.props), () => {
+        this.timer.resumeAnimation();
+      });
     }
-    return true;
   }
 
   componentWillUnmount() {

@@ -107,6 +107,7 @@ function getInitialTransitionState(oldChildren, nextChildren) {
     React.Children.toArray(oldChildren),
     React.Children.toArray(nextChildren)
   );
+
   return {
     nodesWillExit,
     nodesWillEnter,
@@ -238,12 +239,12 @@ function getChildPropsOnEnter(animate, data, enteringNodes, cb) {
  * @return {Function}              Child-prop transformation function.
  */
 function getTransitionPropsFactory(props, state, setState) {
+  const childrenTransitions = (state && state.childrenTransitions) || [];
   const nodesWillExit = state && state.nodesWillExit;
   const nodesWillEnter = state && state.nodesWillEnter;
   const nodesShouldEnter = state && state.nodesShouldEnter;
   const nodesShouldLoad = state && state.nodesShouldLoad;
   const nodesDoneLoad = state && state.nodesDoneLoad;
-  const childrenTransitions = (state && state.childrenTransitions) || [];
   const transitionDurations = {
     enter: props.animate && props.animate.onEnter && props.animate.onEnter.duration,
     exit: props.animate && props.animate.onExit && props.animate.onExit.duration,
@@ -317,7 +318,6 @@ function getTransitionPropsFactory(props, state, setState) {
       defaultTransitions && defaultTransitions.onEnter
     );
     animate.onLoad = defaults({}, animate.onLoad, defaultTransitions && defaultTransitions.onLoad);
-
     const childTransitions = childrenTransitions[index] || childrenTransitions[0];
     if (!nodesDoneLoad) {
       // should do onLoad animation
@@ -333,8 +333,7 @@ function getTransitionPropsFactory(props, state, setState) {
         transitionDurations.exit !== undefined
           ? transitionDurations.exit
           : getChildTransitionDuration(child, "onExit");
-      // if nodesWillExit, but this child has no exiting nodes, set a delay instead of a duration
-      const animation = exitingNodes ? { duration: exit } : { delay: exit };
+      const animation = { duration: exit };
       return onExit(exitingNodes, child, data, assign({}, animate, animation));
     } else if (nodesWillEnter) {
       const enteringNodes = childTransitions && childTransitions.entering;

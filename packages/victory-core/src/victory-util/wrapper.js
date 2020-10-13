@@ -116,14 +116,15 @@ export default {
         childrenTransitions,
         nodesShouldEnter
       } = Transitions.getInitialTransitionState(oldChildren, nextChildren);
+      const  childTransitions = Collection.isArrayOfArrays(childrenTransitions)
+      ? childrenTransitions[0]
+      : childrenTransitions;
 
       this.setState({
         nodesWillExit,
         nodesWillEnter,
         nodesShouldEnter,
-        childrenTransitions: Collection.isArrayOfArrays(childrenTransitions)
-          ? childrenTransitions[0]
-          : childrenTransitions,
+        childrenTransitions: childTransitions,
         oldProps: nodesWillExit ? props : null,
         nextProps,
         continuous

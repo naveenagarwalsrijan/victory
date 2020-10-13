@@ -33,27 +33,19 @@ export default (WrappedComponent, options) => {
     }
 
     shouldComponentUpdate(nextProps) {
-      const calculatedValues = this.getCalculatedValues(nextProps);
       const externalMutations = this.getExternalMutations(nextProps);
-      const animating = this.props.animating || this.props.animate;
-      const newMutation = !isEqual(externalMutations, this.externalMutations);
-      if (animating || newMutation) {
-        this.cacheValues(calculatedValues);
+      if (!isEqual(externalMutations, this.externalMutations)) {
         this.externalMutations = externalMutations;
         this.applyExternalMutations(nextProps, externalMutations);
-        return true;
       }
-      const calculatedState = this.getStateChanges(nextProps, calculatedValues);
-      if (!isEqual(this.calculatedState, calculatedState)) {
-        this.calculatedState = calculatedState;
-        this.cacheValues(calculatedValues);
-        return true;
-      }
-      if (!isEqual(this.props, nextProps)) {
-        this.cacheValues(calculatedValues);
-        return true;
-      }
-      return false;
+      return true;
+    }
+
+    componentDidUpdate(prevProps) {
+      const calculatedValues = this.getCalculatedValues(prevProps);
+      const externalMutations = this.getExternalMutations(prevProps);
+      this.externalMutations = externalMutations;
+      this.cacheValues(calculatedValues);
     }
 
     // compile all state changes from own and parent state. Order doesn't matter, as any state

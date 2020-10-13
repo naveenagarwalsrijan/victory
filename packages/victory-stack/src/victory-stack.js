@@ -89,14 +89,10 @@ export default class VictoryStack extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps) {
-    if (this.props.animate) {
-      if (!isEqual(this.props, nextProps)) {
-        this.setAnimationState(this.props, nextProps);
-        return false;
-      }
+  componentDidUpdate(prevProps) {
+    if (this.props.animate && !isEqual(this.props, prevProps)) {
+      this.setAnimationState(prevProps, this.props);
     }
-    return true;
   }
 
   getNewChildren(props, childComponents, calculatedProps) {
