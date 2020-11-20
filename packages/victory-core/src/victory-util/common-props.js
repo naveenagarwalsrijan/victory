@@ -108,6 +108,18 @@ const baseProps = {
   ),
   groupComponent: PropTypes.element,
   height: CustomPropTypes.nonNegative,
+  initialEventMutations: PropTypes.arrayOf(
+    PropTypes.shape({
+      childName: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+      eventKey: PropTypes.oneOfType([
+        PropTypes.array,
+        CustomPropTypes.allOfType([CustomPropTypes.integer, CustomPropTypes.nonNegative]),
+        PropTypes.string
+      ]),
+      mutation: PropTypes.function,
+      target: PropTypes.oneOfType([PropTypes.string, PropTypes.array])
+    })
+  ),
   name: PropTypes.string,
   origin: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
   padding: PropTypes.oneOfType([

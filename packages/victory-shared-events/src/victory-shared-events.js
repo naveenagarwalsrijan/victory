@@ -45,7 +45,19 @@ export default class VictorySharedEvents extends React.Component {
         target: PropTypes.oneOfType([PropTypes.string, PropTypes.array])
       })
     ),
-    groupComponent: PropTypes.node
+    groupComponent: PropTypes.node,
+    initialEventMutations: PropTypes.arrayOf(
+      PropTypes.shape({
+        childName: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+        eventKey: PropTypes.oneOfType([
+          PropTypes.array,
+          CustomPropTypes.allOfType([CustomPropTypes.integer, CustomPropTypes.nonNegative]),
+          PropTypes.string
+        ]),
+        mutation: PropTypes.function,
+        target: PropTypes.oneOfType([PropTypes.string, PropTypes.array])
+      })
+    ),
   };
 
   static defaultProps = {
@@ -64,24 +76,19 @@ export default class VictorySharedEvents extends React.Component {
   }
 
   componentDidMount() {
-    // const initialExternalMutations = [
-    //   {
-    //     childName: "all",
-    //     target: ["data", "labels"],
-    //     eventKey: "all",
-    //     mutation: () => ({ active: true })
-    //   }
-    // ];
-
-    const externalMutations = this.getInitialMutations(this.props, this.baseProps);
-    this.applyInitialMutations(this.props, externalMutations);
+    const initialMutations = this.getMutations(
+      this.props,
+      this.baseProps,
+      "initialEventMutations"
+    );
+    this.applyInitialMutations(initialMutations);
   }
 
 
   shouldComponentUpdate(nextProps) {
     if (!isEqual(this.props, nextProps)) {
       this.baseProps = this.getBaseProps(nextProps);
-      const externalMutations = this.getExternalMutations(nextProps, this.baseProps);
+      const externalMutations = this.getMutations(nextProps, this.baseProps);
       this.applyExternalMutations(nextProps, externalMutations);
     }
     return true;
@@ -98,18 +105,9 @@ export default class VictorySharedEvents extends React.Component {
     return props.events;
   }
 
-  applyInitialMutations(props, initialMutations) {
+  applyInitialMutations(initialMutations) {
     if (!isEmpty(initialMutations)) {
-      const callbacks = props.initialEventMutations.reduce((memo, mutation) => {
-        memo = isFunction(mutation.callback) ? memo.concat(mutation.callback) : memo;
-        return memo;
-      }, []);
-      const compiledCallbacks = callbacks.length
-        ? () => {
-            callbacks.forEach((c) => c());
-          }
-        : undefined;
-      this.setState(initialMutations, compiledCallbacks);
+      this.setState(initialMutations);
     }
   }
 
@@ -128,21 +126,10 @@ export default class VictorySharedEvents extends React.Component {
     }
   }
 
-  getInitialMutations(props, baseProps) {
-    return !isEmpty(props.initialEventMutations)
+  getMutations(props, baseProps, type = "externalEventMutations") {
+    return !isEmpty(props[type])
       ? Events.getExternalMutationsWithChildren(
-          props.initialEventMutations,
-          baseProps,
-          this.state,
-          keys(baseProps)
-        )
-      : undefined;
-  }
-
-  getExternalMutations(props, baseProps) {
-    return !isEmpty(props.externalEventMutations)
-      ? Events.getExternalMutationsWithChildren(
-          props.externalEventMutations,
+          props[type],
           baseProps,
           this.state,
           keys(baseProps)

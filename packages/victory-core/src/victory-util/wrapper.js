@@ -143,21 +143,19 @@ export default {
     return events || [];
   },
 
-//   getInitialEventMutations(props, components) {
-//     const events =
-//       Array.isArray(components) &&
-//       components.reduce((memo, componentName) => {
-//         const component = props[componentName];
-//         const initialEventMutations = component && component.type && component.type.initialEventMutations;
-//         const componentEvents = isFunction(initialEventMutations)
-//           ? initialEventMutations(component.props)
-//           : initialEventMutations;
-//         memo = Array.isArray(componentEvents) ? memo.concat(...componentEvents) : memo;
-//         return memo;
-//       }, []);
-//     return events && events.length ? events : undefined;
-//   }
-// },
+  getInitialEventMutations(props) {
+    const components = ["containerComponent"];
+    const componentMutations = Events.getComponentEvents(
+      props, components, "initialEventMutations"
+    );
+
+    if (Array.isArray(componentMutations)) {
+      return Array.isArray(props.initialEventMutations)
+        ? componentMutations.concat(...props.initialEventMutations)
+        : componentMutations;
+    }
+    return props.initialEventMutations;
+  },
 
   getAnimationProps(props, child, index) {
     if (!props.animate) {

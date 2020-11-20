@@ -127,6 +127,8 @@ export default class VictoryGroup extends React.Component {
       ? this.renderContainer(containerComponent, containerProps)
       : groupComponent;
     const events = Wrapper.getAllEvents(props);
+    const initialEventMutations = Wrapper.getInitialEventMutations(props);
+
     if (!isEmpty(events)) {
       return (
         <VictorySharedEvents
@@ -134,6 +136,7 @@ export default class VictoryGroup extends React.Component {
           eventKey={eventKey}
           events={events}
           externalEventMutations={externalEventMutations}
+          initialEventMutations={initialEventMutations}
         >
           {newChildren}
         </VictorySharedEvents>

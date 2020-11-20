@@ -359,12 +359,12 @@ export default {
   /* Returns an array of defaultEvents from sub-components of a given component.
    * i.e. any static `defaultEvents` on `labelComponent` will be returned
    */
-  getComponentEvents(props, components) {
+  getComponentEvents(props, components, eventType = "defaultEvents") {
     const events =
       Array.isArray(components) &&
       components.reduce((memo, componentName) => {
         const component = props[componentName];
-        const defaultEvents = component && component.type && component.type.defaultEvents;
+        const defaultEvents = component && component.type && component.type[eventType];
         const componentEvents = isFunction(defaultEvents)
           ? defaultEvents(component.props)
           : defaultEvents;
