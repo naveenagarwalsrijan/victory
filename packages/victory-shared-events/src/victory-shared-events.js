@@ -63,6 +63,21 @@ export default class VictorySharedEvents extends React.Component {
     this.sharedEventsCache = {};
   }
 
+  componentDidMount() {
+    // const initialExternalMutations = [
+    //   {
+    //     childName: "all",
+    //     target: ["data", "labels"],
+    //     eventKey: "all",
+    //     mutation: () => ({ active: true })
+    //   }
+    // ];
+
+    const externalMutations = this.getInitialMutations(this.props, this.baseProps);
+    this.applyInitialMutations(this.props, externalMutations);
+  }
+
+
   shouldComponentUpdate(nextProps) {
     if (!isEqual(this.props, nextProps)) {
       this.baseProps = this.getBaseProps(nextProps);
@@ -83,6 +98,21 @@ export default class VictorySharedEvents extends React.Component {
     return props.events;
   }
 
+  applyInitialMutations(props, initialMutations) {
+    if (!isEmpty(initialMutations)) {
+      const callbacks = props.initialEventMutations.reduce((memo, mutation) => {
+        memo = isFunction(mutation.callback) ? memo.concat(mutation.callback) : memo;
+        return memo;
+      }, []);
+      const compiledCallbacks = callbacks.length
+        ? () => {
+            callbacks.forEach((c) => c());
+          }
+        : undefined;
+      this.setState(initialMutations, compiledCallbacks);
+    }
+  }
+
   applyExternalMutations(props, externalMutations) {
     if (!isEmpty(externalMutations)) {
       const callbacks = props.externalEventMutations.reduce((memo, mutation) => {
@@ -96,6 +126,17 @@ export default class VictorySharedEvents extends React.Component {
         : undefined;
       this.setState(externalMutations, compiledCallbacks);
     }
+  }
+
+  getInitialMutations(props, baseProps) {
+    return !isEmpty(props.initialEventMutations)
+      ? Events.getExternalMutationsWithChildren(
+          props.initialEventMutations,
+          baseProps,
+          this.state,
+          keys(baseProps)
+        )
+      : undefined;
   }
 
   getExternalMutations(props, baseProps) {

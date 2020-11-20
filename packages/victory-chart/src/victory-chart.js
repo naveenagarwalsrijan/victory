@@ -1,4 +1,4 @@
-import { defaults, assign, isEmpty } from "lodash";
+import { defaults, assign, isEmpty, isFunction } from "lodash";
 import PropTypes from "prop-types";
 import React from "react";
 import {
@@ -131,6 +131,22 @@ export default class VictoryChart extends React.Component {
     };
   }
 
+  getInitialEventMutations(props) {
+    const components = ["containerComponent"];
+    const events =
+      Array.isArray(components) &&
+      components.reduce((memo, componentName) => {
+        const component = props[componentName];
+        const initialEventMutations = component && component.type && component.type.initialEventMutations;
+        const componentEvents = isFunction(initialEventMutations)
+          ? initialEventMutations(component.props)
+          : initialEventMutations;
+        memo = Array.isArray(componentEvents) ? memo.concat(...componentEvents) : memo;
+        return memo;
+      }, []);
+    return events && events.length ? events : undefined;
+  }
+
   render() {
     const props =
       this.state && this.state.nodesWillExit ? this.state.oldProps || this.props : this.props;
@@ -142,6 +158,7 @@ export default class VictoryChart extends React.Component {
       standalone,
       externalEventMutations
     } = modifiedProps;
+    const initialEventMutations = this.getInitialEventMutations(props);
     const axes = props.polar ? modifiedProps.defaultPolarAxes : modifiedProps.defaultAxes;
     const childComponents = getChildComponents(modifiedProps, axes);
     const calculatedProps = getCalculatedProps(modifiedProps, childComponents);
@@ -159,6 +176,7 @@ export default class VictoryChart extends React.Component {
           eventKey={eventKey}
           events={events}
           externalEventMutations={externalEventMutations}
+          initialEventMutations={initialEventMutations}
         >
           {newChildren}
         </VictorySharedEvents>

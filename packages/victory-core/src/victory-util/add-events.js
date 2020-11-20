@@ -30,12 +30,23 @@ export default (WrappedComponent, options) => {
       this.cacheValues(calculatedValues);
       this.externalMutations = this.getExternalMutations(props);
       this.calculatedState = this.getStateChanges(props);
+      this.initialMutations = undefined;
     }
+
+    componentDidMount() {
+      const initialMutations = this.getInitialMutations(this.props, this.baseProps);
+      this.initialMutations = initialMutations;
+      this.applyInitialMutations(initialMutations);
+    }
+
 
     shouldComponentUpdate(nextProps) {
       const externalMutations = this.getExternalMutations(nextProps);
       const animating = this.props.animating || this.props.animate;
       const newMutation = !isEqual(externalMutations, this.externalMutations);
+      if (this.initialMutations) {
+        return true;
+      }
       if (animating || newMutation) {
         this.cacheValues(this.getCalculatedValues(nextProps));
         this.externalMutations = externalMutations;
@@ -129,6 +140,39 @@ export default (WrappedComponent, options) => {
       };
     }
 
+    getInitialMutations(props) {
+      const { sharedEvents } = props;
+      const initialEventMutations = this.getInitialEventMutationsFromComponents(props);
+      return isEmpty(initialEventMutations) || sharedEvents
+        ? undefined
+        : Events.getExternalMutations(initialEventMutations, this.baseProps, this.state);
+    }
+
+    getInitialEventMutationsFromComponents(props) {
+      const components = ["containerComponent"];
+      const events =
+        Array.isArray(components) &&
+        components.reduce((memo, componentName) => {
+          const component = props[componentName];
+          const initialEventMutations = component && component.type && component.type.initialEventMutations;
+          const componentEvents = isFunction(initialEventMutations)
+            ? initialEventMutations(component.props)
+            : initialEventMutations;
+          memo = Array.isArray(componentEvents) ? memo.concat(...componentEvents) : memo;
+          return memo;
+        }, []);
+      return events && events.length ? events : undefined;
+    };
+
+    applyInitialMutations(initialMutations) {
+      if (!isEmpty(initialMutations)) {
+        const callback = () => {
+          this.initialMutations = undefined;
+        };
+        this.setState(initialMutations, callback);
+      }
+    }
+
     getExternalMutations(props) {
       const { sharedEvents, externalEventMutations } = props;
       return isEmpty(externalEventMutations) || sharedEvents
@@ -171,7 +215,6 @@ export default (WrappedComponent, options) => {
       const id = `${name}-${type}-${key}`;
 
       const baseProps = (this.baseProps[key] && this.baseProps[key][type]) || this.baseProps[key];
-
       if (!baseProps && !this.hasEvents) {
         return undefined;
       }
