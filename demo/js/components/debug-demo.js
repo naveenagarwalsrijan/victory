@@ -24,6 +24,29 @@ class App extends React.Component {
     const chartStyle = { parent: { border: "1px solid #ccc", margin: "2%", maxWidth: "40%" } };
     return (
       <div style={containerStyle}>
+      <VictoryChart
+        style={chartStyle}
+        domain={{ x: [0, 5], y: [0, 7] }}
+      >
+        <VictoryScatter
+          animate={{
+            onLoad: {
+              duration: 3000,
+              before: () => ({ opacity: 0.3 }),
+              after: () => ({ opacity: 1 })
+             }
+          }}
+          style={{ data: { opacity: ({datum}) => datum.opacity}}}
+          size={7}
+          data={[
+            { x: 1, y: 2 },
+            { x: 2, y: 3 },
+            { x: 3, y: 5 },
+            { x: 4, y: 4 },
+            { x: 5, y: 7 }
+          ]}
+        />
+      </VictoryChart>
         <VictoryChart style={chartStyle} containerComponent={<VictoryZoomContainer />}>
           <VictoryStack colorScale="warm">
             <VictoryGroup

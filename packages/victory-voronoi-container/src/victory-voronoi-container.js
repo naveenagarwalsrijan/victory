@@ -41,7 +41,7 @@ export const voronoiContainerMixin = (base) =>
       voronoiPadding: 5
     };
 
-    static initialEventMutations = () => {
+    static initialEventMutations = (props) => {
       return [
         {
           childName: "all",
