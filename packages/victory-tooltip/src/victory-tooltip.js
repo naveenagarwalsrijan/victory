@@ -133,9 +133,9 @@ export default class VictoryTooltip extends React.Component {
           onMouseOver: () => activate,
           onFocus: () => activate,
           onTouchStart: () => activate,
-          onMouseOut: () => deactivate,
-          onBlur: () => deactivate,
-          onTouchEnd: () => deactivate
+          onMouseOut: () => activate,
+          onBlur: () => activate,
+          onTouchEnd: () => activate
         }
       }
     ];
